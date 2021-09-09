@@ -1,5 +1,5 @@
-with "gtkada";
-with "wavefiles";
+with "gtkada.gpr";
+with "audio_wavefiles.gpr";
 
 project Ada_Wavefiles_Gtk_App is
 
