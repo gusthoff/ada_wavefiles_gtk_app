@@ -30,9 +30,9 @@
 with Interfaces;
 with Ada.Characters.Latin_1;
 
-with Wavefiles;
-with Wavefiles.Read;
-with RIFF;
+with Audio.Wavefiles;
+with Audio.RIFF.Wav.Formats;
+with Audio.RIFF.Wav.GUIDs;
 
 package body WaveFiles_Gtk.Wavefile_Manager is
 
@@ -41,25 +41,25 @@ package body WaveFiles_Gtk.Wavefile_Manager is
    --------------
 
    function Get_Info (Wavefile : String) return String is
-      WF_In       : Wavefiles.Wavefile;
-      RIFF_Data   : RIFF.Wave_Format_Extensible;
+      WF_In       : Audio.Wavefiles.Wavefile;
+      RIFF_Data   : Audio.RIFF.Wav.Formats.Wave_Format_Extensible;
 
-      function Get_RIFF_GUID_String (Sub_Format : RIFF.GUID) return String;
-      function Get_RIFF_Extended (RIFF_Data : RIFF.Wave_Format_Extensible)
+      function Get_RIFF_GUID_String (Sub_Format : Audio.RIFF.Wav.Formats.GUID) return String;
+      function Get_RIFF_Extended (RIFF_Data : Audio.RIFF.Wav.Formats.Wave_Format_Extensible)
                                   return String;
 
-      package Wav_Read  renames  Wavefiles.Read;
+      package Wav_Read  renames  Audio.Wavefiles;
       use Interfaces;
 
-      function Get_RIFF_GUID_String (Sub_Format : RIFF.GUID) return String
+      function Get_RIFF_GUID_String (Sub_Format : Audio.RIFF.Wav.Formats.GUID) return String
       is
-         use type RIFF.GUID;
+         use type Audio.RIFF.Wav.Formats.GUID;
       begin
-         if Sub_Format = RIFF.GUID_Undefined then
+         if Sub_Format = Audio.RIFF.Wav.GUIDs.GUID_Undefined then
             return "Subformat: undefined";
-         elsif Sub_Format = RIFF.GUID_PCM then
+         elsif Sub_Format = Audio.RIFF.Wav.GUIDs.GUID_PCM then
             return "Subformat: KSDATAFORMAT_SUBTYPE_PCM (IEC 60958 PCM)";
-         elsif Sub_Format = RIFF.GUID_IEEE_Float then
+         elsif Sub_Format = Audio.RIFF.Wav.GUIDs.GUID_IEEE_Float then
             return "Subformat: KSDATAFORMAT_SUBTYPE_IEEE_FLOAT " &
               "(IEEE Floating-Point PCM)";
          else
@@ -67,7 +67,7 @@ package body WaveFiles_Gtk.Wavefile_Manager is
          end if;
       end Get_RIFF_GUID_String;
 
-      function Get_RIFF_Extended (RIFF_Data : RIFF.Wave_Format_Extensible)
+      function Get_RIFF_Extended (RIFF_Data : Audio.RIFF.Wav.Formats.Wave_Format_Extensible)
                                   return String
       is
          S : constant String :=
@@ -83,20 +83,20 @@ package body WaveFiles_Gtk.Wavefile_Manager is
          end if;
       end Get_RIFF_Extended;
    begin
-      Wav_Read.Open (WF_In, Wavefile);
-      RIFF_Data := Wavefiles.Get_Wave_Format (WF_In);
+      Wav_Read.Open (WF_In, Wav_Read.In_File, Wavefile);
+      RIFF_Data := Wav_Read.Format_Of_Wavefile (WF_In);
       Wav_Read.Close (WF_In);
 
       declare
          S_Wav_1 : constant String :=
                      ("Bits per sample: "
-                      & Unsigned_16'Image (RIFF_Data.Bits_Per_Sample)
+                      & Audio.RIFF.Wav.Formats.Wav_Bit_Depth'Image (RIFF_Data.Bits_Per_Sample)
                       & Ada.Characters.Latin_1.LF
                       & "Channels: "
                       & Unsigned_16'Image (RIFF_Data.Channels)
                       & Ada.Characters.Latin_1.LF
                       & "Samples per second: "
-                      & Unsigned_32'Image (RIFF_Data.Samples_Per_Sec)
+                      & Audio.RIFF.Wav.Formats.Wav_Sample_Rate'Image (RIFF_Data.Samples_Per_Sec)
                       & Ada.Characters.Latin_1.LF
                       & "Extended size: "
                       & Unsigned_16'Image (RIFF_Data.Size)
